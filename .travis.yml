@@ -21,6 +21,8 @@ after_script:
   - git add .
   - git commit -m "Update docs"
   - git pull --rebase origin master
+  - git add .
+  - git commit -m "Update docs"
   - git push --force --quiet "https://${myblog}@${GH_REF}" master:master
 # E: Build LifeCycle
 
