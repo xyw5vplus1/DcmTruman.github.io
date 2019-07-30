@@ -11,7 +11,7 @@ install:
  # - npm install -g gulp
 
 script:
-  -  chmod -r 755 ./node_modules/.bin/hexo
+  -  chmod 777 ./node_modules/.bin/hexo
   - hexo g
 
 after_script:
