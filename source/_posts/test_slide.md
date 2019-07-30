@@ -1,7 +1,10 @@
 ---
 title: 一个幻灯片测试用例
-data: 2019-7-31 04:47:33
-layout: slides
+tags: 
+  - 功能测试
+categories:
+  - 功能测试
+data: 2019-7-31
 ---
 
 # this
