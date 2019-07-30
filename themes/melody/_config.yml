@@ -21,6 +21,7 @@ menu:
   Archives: /archives
   Tags: /tags
   Categories: /categories
+  Slide: /slides
   #XXX: /xxx
 
 # Favicon
@@ -43,7 +44,7 @@ pwa:
 
 # Highlight theme
 # ---------------
-highlight_theme: default
+highlight_theme: darker
 
 # code_word_wrap: true or false
 
@@ -72,7 +73,7 @@ local_search:
 # Please see doc for more details: https://molunerfinn.com/hexo-theme-melody-doc/#/third-party-support?id=mathjax
 # ---------------
 mathjax:
-  enable: false
+  enable: true
   cdn: https://cdn.jsdelivr.net/npm/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML
 
 # KaTeX
@@ -230,7 +231,7 @@ disqus:
 
 # Footer Settings
 # ---------------
-since: 2013
+since: 2019
 
 # footer_custom_text:
 
