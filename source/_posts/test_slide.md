@@ -4,7 +4,8 @@ tags:
   - 功能测试
 categories:
   - 功能测试
-data: 2019-7-31
+date: 2019-7-31
+layout: slides
 ---
 
 # this
