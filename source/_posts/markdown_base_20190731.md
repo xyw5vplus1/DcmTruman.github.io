@@ -5,7 +5,7 @@ tags:
   - 教程
 categories:
   - acm队伍相关
-date: 2019-8-1
+date: 2019-8-1 01:47:37
 ---
 
 # markdown快速上手
@@ -17,6 +17,7 @@ date: 2019-8-1
 > Markdown 是一种轻量级标记语言，它允许人们使用易读易写的纯文本格式编写文档，然后转换成格式丰富的HTML页面。    —— [维基百科](https://zh.wikipedia.org/wiki/Markdown)
 
 首先是一些基础功能
+<!-- more -->
 
 ### 标题
 
