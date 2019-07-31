@@ -9,16 +9,17 @@ layout: slides
 ---
 
 # this
-
+<!-- .slide: data-transition="convex" data-background="#1B9EF3" -->
 # jkfld
 
 - fd
 - ffdas
 
----
+===
 
-fd
+## fd
+<!-- .slide: data-transition="fade" data-background="#00C4B6" -->
 
 ===
 
-fda
+### fda
