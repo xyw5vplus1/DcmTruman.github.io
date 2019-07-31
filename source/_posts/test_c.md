@@ -1,5 +1,5 @@
 ---
-title: 代码块测试
+title: 代码块+mathjax测试
 tags: 
   - 功能测试
 categories:
@@ -15,3 +15,7 @@ int main(){
     return 0;
 }
 ```
+
+$e=mc^{2}$
+
+$$e=mc^{2}$$
