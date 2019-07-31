@@ -3,12 +3,16 @@ language: node_js
 node_js: stable
 
 # S: Build Lifecycle
+cache:
+  directories:
+    - node_modules
+
 install:
   - npm install
-  - npm install hexo-renderer-jade hexo-renderer-stylus --save
-  - npm uninstall hexo-generator-index --save
-  - npm install hexo-generator-index-pin-top --save
-  - npm install hexo-generator-search --save
+  # - npm install hexo-renderer-jade hexo-renderer-stylus --save
+  # - npm uninstall hexo-generator-index --save
+  # - npm install hexo-generator-index-pin-top --save
+  # - npm install hexo-generator-search --save
 
 
 #before_script:
