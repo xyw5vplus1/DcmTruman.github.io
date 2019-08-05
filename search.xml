@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search> 
+  
+  
+    
+    <entry>
+      <title>POJ 3181解题报告</title>
+      <link href="/2019/08/03/POJ%203181/"/>
+      <url>/2019/08/03/POJ%203181/</url>
+      
+        <content type="html"><![CDATA[<h1 id="POJ-3181解题报告"><a href="#POJ-3181解题报告" class="headerlink" title="POJ 3181解题报告"></a>POJ 3181解题报告</h1><p>题意很简单，</p><p>给你一个n，问你有多少种方案去把n用不超过k的正整数表示出来</p><p>1&lt;=n&lt;=1000 1&lt;=k&lt;=100</p><p>做法其实也很简单，</p><a id="more"></a><p>设dp [i] [j]表示 用不超过j的正整数表示i的方案数</p><p>那么分两种情况讨论，</p><p>当最大值是j的时候，有dp [i] [j] 从 dp [i-j] [j] 转移过来</p><p>当最大值小于j的时候  dp [i] [j] 从 dp [i] [j-1] 转移过来</p><p>（其实这是一个完全背包计数问题，居然没有看出来(；´д｀)ゞ 还好不影响做题</p><p>然而这题最大的坑点就在于没有取模，所以答案会超过long long 的范围，</p><p>（我会贴高精度的板子！</p><p>然而，你的高精度会T，至少C++的是这样，那么我觉得是不是Python和Java就更不用想了</p><p>牛逼网友们给了一个神奇的做法，<strong>用两个long long 去存储一个不超过二进制下 128 位的数，即第一个表示高64位，第二个表示低64位，然后分别转移</strong></p><p>（貌似就这样实现了一个__int 128  ???  </p><p>不过这种做法当然也有限制条件了，感觉在单纯处理只是加法和乘法的转移可以代替__int 128，然而出现减法就已经有点麻烦了，更不要说出现除法了</p><p>最后贴上丑陋的代码</p><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;cstdio&gt;</span></span></span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">long</span> <span class="keyword">long</span> ll;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> maxn=<span class="number">1000</span>;</span><br><span class="line"><span class="keyword">const</span> <span class="keyword">int</span> maxk=<span class="number">100</span>;</span><br><span class="line"><span class="keyword">int</span> n,k;</span><br><span class="line">ll dp1[maxn+<span class="number">5</span>][maxk+<span class="number">5</span>],dp2[maxn+<span class="number">5</span>][maxn+<span class="number">5</span>];</span><br><span class="line">ll mod=<span class="number">1</span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">scanf</span>(<span class="string">"%d%d"</span>,&amp;n,&amp;k);</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;=<span class="number">18</span>;i++) mod=mod*<span class="number">10</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;=n;i++) dp1[i][<span class="number">1</span>]=<span class="number">1</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> j=<span class="number">0</span>;j&lt;=k;j++) dp1[<span class="number">0</span>][j]=<span class="number">1</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;=n;i++)</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> j=<span class="number">1</span>;j&lt;=k;j++)</span><br><span class="line">        <span class="keyword">if</span> (i&gt;=j) &#123;</span><br><span class="line">            dp2[i][j]=dp2[i-j][j]+dp2[i][j<span class="number">-1</span>]+(dp1[i-j][j]+dp1[i][j<span class="number">-1</span>])/mod;</span><br><span class="line">            dp1[i][j]=(dp1[i-j][j]+dp1[i][j<span class="number">-1</span>])%mod;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">else</span> &#123;</span><br><span class="line">            dp1[i][j]=dp1[i][j<span class="number">-1</span>];</span><br><span class="line">            dp2[i][j]=dp2[i][j<span class="number">-1</span>];</span><br><span class="line">        &#125;</span><br><span class="line">    <span class="keyword">if</span> (dp2[n][k]) <span class="built_in">printf</span>(<span class="string">"%lld"</span>,dp2[n][k]);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"%lld\n"</span>,dp1[n][k]);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      
+      
+      <categories>
+          
+          <category> xyw </category>
+          
+          <category> 动态规划 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> acm </tag>
+            
+            <tag> dp </tag>
+            
+            <tag> 题解 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>xyw_2019年8月4日</title>
+      <link href="/2019/08/03/xyw_day_20190804/"/>
+      <url>/2019/08/03/xyw_day_20190804/</url>
+      
+        <content type="html"><![CDATA[<h1 id="xyw5vplus1-2019-08-04"><a href="#xyw5vplus1-2019-08-04" class="headerlink" title="xyw5vplus1_2019.08.04"></a>xyw5vplus1_2019.08.04</h1><p>今天也没有花很多时间在ACM上</p><p>基本整天都处于放松状态</p><p>只是觉得放松久了需要写点题，不然今天的生活可能会失去色彩，</p><a id="more"></a><p>毕竟貌似某位哲人曾经说过（先剧透一下，是尼采，不是鲁迅），每一个不曾做题的日子，都是对生命的辜负</p><p>（其实下午的游泳还是很舒服的啦</p><p>扯回来</p><p>今天切了几道蛮简单的DP题，基本是挑战程序设计竞赛第二章的课后DP习题</p><p>不过有几个题确实给我带来一些新的启发，以及最后一个题教会我一个小Trick（见今天的另一篇博客 POJ 3181 解题报告）</p><p>今日得到：</p><p>​    拆分类的题目   <strong>往往转移的分类依据是根据最大或者最小元素来分类讨论的</strong>，</p><p>​    比如普通的正整数拆分，就是根据最小元素是不是0来分类的，而那道拆分成2的幂次的题，则是根据最大元素的大小来分拆的。</p><p>​    这样做的原因我想是因为，只要能去掉一个元素，就能使总和那一维度减小，就能实现递推，而如果最值元素是像我们想的那样的极端元素，我们可以把它去掉；如果不是，虽然我们不能使总和变小，但我们可以通过某些一一对应关系来建立数量关系，依然用一个已经计算的状态去转移到当前状态。</p><p>​    小Trick是当最后的数据稍稍超过了long long 的话，并且在转移的时候以加法和乘法为主的话，我们可以用两个long long 分别存下高位和低位的答案，避免使用比较慢的高精度。</p><p>最后，其实尼采的原话是每一个不曾起舞的日子，都是对生命的辜负。</p><p>那就把做题看成是大脑起舞的过程吧~</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> xyw </category>
+          
+          <category> 日报 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 每日总结 </tag>
+            
+            <tag> xyw </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>POJ 2279解题报告</title>
+      <link href="/2019/08/02/POJ%202279/"/>
+      <url>/2019/08/02/POJ%202279/</url>
+      
+        <content type="html"><![CDATA[<h1 id="POJ-2279解题报告"><a href="#POJ-2279解题报告" class="headerlink" title="POJ 2279解题报告"></a>POJ 2279解题报告</h1><p>大致意思是：</p><p>现在有n个人，要排成k行，每行分别是n1,n2,……,nk的人，每个人分别有一个编号，要求每个人的编号要小于他左边和上面的，问有多少种满足题意的方案。</p><p>数据范围 n&lt;=30 k&lt;=5  </p><a id="more"></a><p>并没有什么思路……</p><p>《算法竞赛进阶指南》告诉我们，<strong>DP应该是从一个或几个起点出发，从已知的状态空间的边界点上向还没有被计算的状态空间扩展，最后扩展完整个问题的状态空间。</strong></p><p>我们应该选取<strong>一个不可逆的方向</strong>去思考这个过程，如果我们规定编号从小到大依次去考虑，那么，现在每增加一个元素，都是把这个元素选择一行然后放在最右边的过程，所以转移的分类讨论就是建立在具体选取哪一行。</p><p>当<strong>序</strong>确定下来之后，应该考察<strong>新增加进来更新的元素是如何改变当前的“状态”</strong>（假设我们这边还没有想出状态是什么）的，那么<strong>中间一些产生的差别，就可以作为状态表示的参考</strong>，</p><p>就像本题，当一个元素增加进来之后，唯一变化的应该是有某一行的长度变长了，那么应该是需要用每一行的长度去标记状态，这里的一个小的思考的trick是转移的时候要求当前行已经填的元素个数要比上一行少，我推测这里是有一些题目上没有说清楚的地方，应该要保证n1&gt;=n2&gt;=……&gt;=nk，那么这样的话，当本行元素已经跟上一行元素一样多的时候，如果我这里在本行放了，那么上一行之后放的元素一定比我当前行的元素要大了，所以不满足题意的要求，这个思考的trick也是对于看题解的我不太好想到的，</p><p>当确定了状态的表示之后，转移的条件什么的比较也都要用状态的某一维度或者与状态的某一维度一一对应的量去表示。或许我觉得我这题被卡住的最大的问题就在于这里，<strong>如何用一个量去表示出元素的大小关系</strong>，没想到竟然可以<strong><em>用数量关系去表述出大小关系</em></strong>！</p><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;cstdio&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"><span class="keyword">typedef</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> ui;</span><br><span class="line">ui dp[<span class="number">31</span>][<span class="number">16</span>][<span class="number">11</span>][<span class="number">8</span>][<span class="number">7</span>];</span><br><span class="line"><span class="keyword">int</span> len[<span class="number">6</span>];</span><br><span class="line"><span class="keyword">int</span> n;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">while</span> (<span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;n)!=EOF&amp;&amp;n) &#123;</span><br><span class="line">        <span class="built_in">memset</span>(len,<span class="number">0</span>,<span class="keyword">sizeof</span>(len));</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">1</span>;i&lt;=n;i++) <span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;len[i]);</span><br><span class="line">        <span class="built_in">memset</span>(dp,<span class="number">0</span>,<span class="keyword">sizeof</span>(dp));</span><br><span class="line">        dp[<span class="number">0</span>][<span class="number">0</span>][<span class="number">0</span>][<span class="number">0</span>][<span class="number">0</span>]=<span class="number">1</span>;</span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i1=<span class="number">0</span>;i1&lt;=len[<span class="number">1</span>];i1++)</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i2=<span class="number">0</span>;i2&lt;=len[<span class="number">2</span>];i2++)</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i3=<span class="number">0</span>;i3&lt;=len[<span class="number">3</span>];i3++)</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i4=<span class="number">0</span>;i4&lt;=len[<span class="number">4</span>];i4++)</span><br><span class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i5=<span class="number">0</span>;i5&lt;=len[<span class="number">5</span>];i5++) &#123;</span><br><span class="line">                <span class="keyword">if</span> (i1&lt;len[<span class="number">1</span>]) dp[i1+<span class="number">1</span>][i2][i3][i4][i5]+=dp[i1][i2][i3][i4][i5];</span><br><span class="line">                <span class="keyword">if</span> (i2&lt;len[<span class="number">2</span>]&amp;&amp;i2&lt;i1) dp[i1][i2+<span class="number">1</span>][i3][i4][i5]+=dp[i1][i2][i3][i4][i5];</span><br><span class="line">                <span class="keyword">if</span> (i3&lt;len[<span class="number">3</span>]&amp;&amp;i3&lt;i2) dp[i1][i2][i3+<span class="number">1</span>][i4][i5]+=dp[i1][i2][i3][i4][i5];</span><br><span class="line">                <span class="keyword">if</span> (i4&lt;len[<span class="number">4</span>]&amp;&amp;i4&lt;i3) dp[i1][i2][i3][i4+<span class="number">1</span>][i5]+=dp[i1][i2][i3][i4][i5];</span><br><span class="line">                <span class="keyword">if</span> (i5&lt;len[<span class="number">5</span>]&amp;&amp;i5&lt;i4) dp[i1][i2][i3][i4][i5+<span class="number">1</span>]+=dp[i1][i2][i3][i4][i5];</span><br><span class="line">            &#125;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"%u\n"</span>,dp[len[<span class="number">1</span>]][len[<span class="number">2</span>]][len[<span class="number">3</span>]][len[<span class="number">4</span>]][len[<span class="number">5</span>]]);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>]]></content>
+      
+      
+      <categories>
+          
+          <category> xyw </category>
+          
+          <category> 动态规划 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> acm </tag>
+            
+            <tag> dp </tag>
+            
+            <tag> 题解 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>cm_2019年8月3日</title>
+      <link href="/2019/08/02/cm_day_20190803/"/>
+      <url>/2019/08/02/cm_day_20190803/</url>
+      
+        <content type="html"><![CDATA[<p>高峰还是挺心累的…</p><a id="more"></a><h1 id="白天"><a href="#白天" class="headerlink" title="白天"></a>白天</h1><p>涉及到一些敏感的东西，就不说了。</p><h1 id="晚上"><a href="#晚上" class="headerlink" title="晚上"></a>晚上</h1><p>今天一天其实没怎么碰acm，除了写了个题解之外，其实还挺惭愧的。就聊聊其他事吧，反正随便写。</p><p>杨和苏最近出了首个，《决不投降》，真的帮，里面有几个很巧妙的押韵，<code>神志不清，人事不省，肯定不行</code>学到了。语速虽然不快，但是flow是真的棒，光从学这首歌的费劲程度就能看出来。用了一晚上学会了，虽然有点费嗓子，但是真的好听。词也很棒！！！希望自己以后也能达到这种高度！</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> cm </category>
+          
+          <category> 日报 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 每日总结 </tag>
+            
+            <tag> cm </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>ACM_错误统计</title>
+      <link href="/2019/08/01/ACM_wrongcount_20190802/"/>
+      <url>/2019/08/01/ACM_wrongcount_20190802/</url>
+      
+        <content type="html"><![CDATA[<h1 id="失败是成功之母！今天起开始好好记录自己的错误！"><a href="#失败是成功之母！今天起开始好好记录自己的错误！" class="headerlink" title="失败是成功之母！今天起开始好好记录自己的错误！"></a>失败是成功之母！今天起开始好好记录自己的错误！</h1><p>本博客用来统计各位队员在平常做题，比赛，训练中犯得错误，时刻提醒自己。</p><a id="more"></a><h1 id="cm"><a href="#cm" class="headerlink" title="cm"></a>cm</h1><table><thead><tr><th>错误</th><th align="center">最近一次犯错时间</th><th align="center">次数</th></tr></thead><tbody><tr><td>主席树中，该使用左右孩子节点的时候，使用了自身节点</td><td align="center">2019-08-01</td><td align="center">3</td></tr><tr><td>主席树中，左右节点搞错</td><td align="center">2019-08-03</td><td align="center">1</td></tr><tr><td>写错变量名</td><td align="center">2019-08-01</td><td align="center">2</td></tr><tr><td>读入时传错变量</td><td align="center">2019-08-02</td><td align="center">1</td></tr><tr><td>临界情况未考虑</td><td align="center">2019-08-02</td><td align="center">1</td></tr><tr><td>数据范围算错</td><td align="center">2019-08-05</td><td align="center">1</td></tr></tbody></table><h1 id="xyw"><a href="#xyw" class="headerlink" title="xyw"></a>xyw</h1><table><thead><tr><th>错误</th><th align="center">最近一次犯错时间</th><th align="center">次数</th></tr></thead><tbody><tr><td>题读错</td><td align="center">2019-08-02</td><td align="center">1</td></tr><tr><td>无向图有向图看错</td><td align="center">2019-07-22</td><td align="center">2</td></tr><tr><td>矩阵快速幂指数处理不当，出现负数，导致T</td><td align="center">2019-08-05</td><td align="center">2</td></tr></tbody></table><h1 id="key"><a href="#key" class="headerlink" title="key"></a>key</h1><table><thead><tr><th>错误</th><th align="center">最近一次犯错时间</th><th align="center">次数</th></tr></thead><tbody><tr><td></td><td align="center"></td><td align="center"></td></tr></tbody></table>]]></content>
+      
+      
+      <categories>
+          
+          <category> acm队伍相关 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> acm </tag>
+            
+            <tag> 错误统计 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>cm_2019年8月2日</title>
+      <link href="/2019/08/01/cm_day_20190802/"/>
+      <url>/2019/08/01/cm_day_20190802/</url>
+      
+        <content type="html"><![CDATA[<p><em>其实这边日报是八月三号写的，因为昨天实在是太累，又要早起，就先早睡了</em></p><p>以后准备统计日常犯得错误，发现最近写主席树经常会犯很多弱智错误……</p><a id="more"></a><h1 id="上午"><a href="#上午" class="headerlink" title="上午"></a>上午</h1><p>依然，做了一些codeforces上的题，有个dp，还算比较简单的那种，大概很最大子段和有点像，有个异或有关的题，一开始无脑想kmp（题目本身有点字符串匹配的意思），但是写到一半突然发现复杂度不对， 再想想，觉得扫一遍就可以了，感觉自己好弱智，耽误了十多分钟。<strong>以后敲之前一定要想清楚一些</strong>，不要无脑上手。</p><p>还有个最小生成树的题，题目描述读了好久，简单说就是，改变一个边的权值，使得这个边在最小生成树之一中，问这个边值最大能是多少，kruscal搞一下就行了，不难。</p><p>剩下题比较好想。</p><h1 id="下午"><a href="#下午" class="headerlink" title="下午"></a>下午</h1><p>下午收获还是很多的，继续嘴巴ac，一些hdu上的题能很快想到，codeforces上的题就没那么裸了。</p><p>有个题需要快速求矩形能点的个数，学到原来主席树搞一下可以出了这类操作。</p><p>还有个很巧妙的统计区间不同数个数的题，建树很巧妙，同时复杂度也很有文章可以做，等下专门放在题解里讲</p><h1 id="晚上"><a href="#晚上" class="headerlink" title="晚上"></a>晚上</h1><p>晚上有点自闭，果然嘴巴ac上远远不够的，一道题还是调了好久，好在最后是过了</p><p>看完了最新一期的《中国新说唱2019》，还是有挺多感触的。这期很精彩，新秀牛逼，黄旭牛逼，其他人也牛逼。有些如觉得呛别人何必呢，然而这才是battle的乐趣啊，有些如觉得黄旭作作，被diss了，diss回去没毛病啊，而且《天堂来信》这首歌，对黄旭的意义多深知道吗，就算急眼了，也可以理解，要是可以说脏话，你是没见过真正的battle，这种比赛，就是该有炸点有看点才精彩好吗。当然，love&amp;peace也是看点。虽然节目里doooboi没有展现出来这个位置应该有的实力，但这也并不影响我听他的歌。</p><p>有些人看个说唱，讨厌这个，烦那个，真当这是选秀节目啊，饭圈那一套也逐渐被带过来了。就像膜老师说的，真正的hiphop，还是小众。</p><p>我看这个节目，基本不会去讨厌任何一个rapper，真正讨厌的，也就只有节目组的一些行为和一些一些傻x赛制。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> cm </category>
+          
+          <category> 日报 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 主席树 </tag>
+            
+            <tag> 每日总结 </tag>
+            
+            <tag> cm </tag>
+            
+            <tag> 数据结构 </tag>
+            
+            <tag> 观后感 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>xyw_2019年8月2日</title>
+      <link href="/2019/08/01/xyw_day_20190802/"/>
+      <url>/2019/08/01/xyw_day_20190802/</url>
+      
+        <content type="html"><![CDATA[<p>上午继续树形背包，面向题解的编程</p><p>区间DP Wa到自闭，可能还要多做点题才能融汇贯通，现在还处在 </p><p>嗯我觉得我想出正解了，果然轻松过样例，卧槽，居然WA了，然后就自闭了</p><p>能明白别人的是对的，但就是不知道自己的为什么错了</p><p>下午继续嘴巴做主席树，几个n/1+n/2+……+n/n的题还挺有意思的，</p><p>不少HDU的脑补切题觉得还挺容易的，但就怕到时候写不出来</p><p>CF的几道题还挺难的</p><p>晚上继续写主席树，简单的区间第K大已经比较有把握了，但是稍微复杂一点的还是会写残</p><p>明天视心情决定是不是打牛客多校</p><p>晚上最后看了树上讲解的高斯消元，准备整理到板子里去</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> xyw </category>
+          
+          <category> 日报 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 每日总结 </tag>
+            
+            <tag> xyw </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>markdown基础语法</title>
+      <link href="/2019/07/31/markdown_base_20190731/"/>
+      <url>/2019/07/31/markdown_base_20190731/</url>
+      
+        <content type="html"><![CDATA[<h1 id="markdown快速上手"><a href="#markdown快速上手" class="headerlink" title="markdown快速上手"></a>markdown快速上手</h1><h2 id="Markdown简介"><a href="#Markdown简介" class="headerlink" title="Markdown简介"></a>Markdown简介</h2><blockquote><p>Markdown 是一种轻量级标记语言，它允许人们使用易读易写的纯文本格式编写文档，然后转换成格式丰富的HTML页面。    —— <a href="https://zh.wikipedia.org/wiki/Markdown" target="_blank" rel="noopener">维基百科</a></p></blockquote><p>首先是一些基础功能</p><a id="more"></a><h3 id="标题"><a href="#标题" class="headerlink" title="标题"></a>标题</h3><p>通过<code>#</code>设置标题大小</p><h1 id="一级标题"><a href="#一级标题" class="headerlink" title="一级标题"></a>一级标题</h1><h2 id="二级标题"><a href="#二级标题" class="headerlink" title="二级标题"></a>二级标题</h2><h3 id="三级标题"><a href="#三级标题" class="headerlink" title="三级标题"></a>三级标题</h3><p>代码如下</p><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="section"># 一级标题 #</span></span><br><span class="line"><span class="section">## 二级标题 ##</span></span><br><span class="line"><span class="section">### 三级标题 ###</span></span><br></pre></td></tr></table></figure><h3 id="有序-无序列表"><a href="#有序-无序列表" class="headerlink" title="有序/无序列表"></a>有序/无序列表</h3><p>通过<code>-.</code>或者<code>x.</code>（x为数字)的形式</p><ol><li>test1<ol><li>test1.1</li><li>test1.2</li></ol></li><li>test2</li><li>test3</li></ol><ul><li>test4<ul><li>test4.1</li><li>test4.2</li></ul></li><li>test5</li><li>test6</li></ul><p>代码如下</p><figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">1. </span>test1</span><br><span class="line"><span class="bullet">1. </span>test1.1</span><br><span class="line"><span class="bullet">2. </span>test1.2</span><br><span class="line"><span class="bullet">2. </span>test2</span><br><span class="line"><span class="bullet">3. </span>test3</span><br><span class="line"></span><br><span class="line"><span class="bullet">- </span>test4</span><br><span class="line"><span class="bullet">- </span>test4.1</span><br><span class="line"><span class="bullet">- </span>test4.2</span><br><span class="line"><span class="bullet">- </span>test5</span><br><span class="line"><span class="bullet">- </span>test6</span><br></pre></td></tr></table></figure><h3 id="文字"><a href="#文字" class="headerlink" title="文字"></a>文字</h3><p><em>斜体</em> ：<code>*斜体*</code></p><p><strong>加粗</strong>：<code>**加粗**</code></p><h3 id="分割线"><a href="#分割线" class="headerlink" title="分割线"></a>分割线</h3><p><code>---</code></p><h3 id="引用"><a href="#引用" class="headerlink" title="引用"></a>引用</h3><p><code>&gt;</code></p><hr><p>正如您在阅读的这份文档，它使用简单的符号标识不同的标题，将某些文字标记为<strong>粗体</strong>或者<em>斜体</em>，创建一个<a href="http://www.example.com" target="_blank" rel="noopener">链接</a>。下面列举了几个高级功能，具体方法可以参加github中该文章的<a href="https://raw.githubusercontent.com/DcmTruman/DcmTruman.github.io/blog_source/source/_posts/markdown_base_20190731.md" target="_blank" rel="noopener">源文件</a></p><h3 id="代码块"><a href="#代码块" class="headerlink" title="代码块"></a>代码块</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@requires_authorization</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">somefunc</span><span class="params">(param1=<span class="string">''</span>, param2=<span class="number">0</span>)</span>:</span></span><br><span class="line">    <span class="string">'''A docstring'''</span></span><br><span class="line">    <span class="keyword">if</span> param1 &gt; param2: <span class="comment"># interesting</span></span><br><span class="line">        <span class="keyword">print</span> <span class="string">'Greater'</span></span><br><span class="line">    <span class="keyword">return</span> (param2 - param1 + <span class="number">1</span>) <span class="keyword">or</span> <span class="literal">None</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SomeClass</span>:</span></span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>message = <span class="string">'''interpreter</span></span><br><span class="line"><span class="string"><span class="meta">... </span>prompt'''</span></span><br></pre></td></tr></table></figure><h3 id="LaTeX-公式"><a href="#LaTeX-公式" class="headerlink" title="LaTeX 公式"></a>LaTeX 公式</h3><p>可以创建行内公式，例如 $\Gamma(n) = (n-1)!\quad\forall n\in\mathbb N$。或者块级公式：</p><p>$$    x = \dfrac{-b \pm \sqrt{b^2 - 4ac}}{2a} $$</p><h3 id="表格"><a href="#表格" class="headerlink" title="表格"></a>表格</h3><table><thead><tr><th align="left">Item</th><th align="right">Value</th><th align="center">Qty</th></tr></thead><tbody><tr><td align="left">Computer</td><td align="right">1600 USD</td><td align="center">5</td></tr><tr><td align="left">Phone</td><td align="right">12 USD</td><td align="center">12</td></tr><tr><td align="left">Pipe</td><td align="right">1 USD</td><td align="center">234</td></tr></tbody></table><h3 id="复选框"><a href="#复选框" class="headerlink" title="复选框"></a>复选框</h3><p>使用 <code>- [ ]</code> 和 <code>- [x]</code> 语法可以创建复选框，实现 todo-list 等功能。例如：</p><ul><li><input checked disabled type="checkbox"> 已完成事项</li><li><input disabled type="checkbox"> 待办事项1</li><li><input disabled type="checkbox"> 待办事项2</li></ul>]]></content>
+      
+      
+      <categories>
+          
+          <category> acm队伍相关 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> acm队伍相关 </tag>
+            
+            <tag> 教程 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>博客使用说明</title>
+      <link href="/2019/07/31/blog_instructions_20190801/"/>
+      <url>/2019/07/31/blog_instructions_20190801/</url>
+      
+        <content type="html"><![CDATA[<p>本博客基于hexo melody主题搭建，队员初次构建个人博客可以参考此文章</p><h1 id="博客"><a href="#博客" class="headerlink" title="博客"></a>博客</h1><p>博客由markdown格式书写，文件名统一规定为<code>博客英文名_20xx-xx-xx.md</code>，文件名请使用英文，不熟悉markdown的请先学习<a href="https://dcmtruman.github.io/2019/07/31/markdown_base_20190731/">markdown基础用法</a></p><p>完成之后使用个人在github文件到<a href="https://github.com/DcmTruman/DcmTruman.github.io/tree/blog_source/source/_posts" target="_blank" rel="noopener">该网站目录下</a>,记得上传的时候填写commit</p><p><img src="https://b2.bmp.ovh/imgs/2019/08/f3c5efed2fbefa5e.png" alt="上传博客"></p><p>稍等片刻，travis CI将会自动构建新的博客，延迟大概在五分钟</p><p><strong>注意</strong> ：博客在首页预览时会自动节选前150字，但会影响排版，如果有美观需求，请手动添加<code>&lt;!-- more --&gt;</code>决定预览位置</p><a id="more"></a><h1 id="文件头：文章名、目录、标签和日期"><a href="#文件头：文章名、目录、标签和日期" class="headerlink" title="文件头：文章名、目录、标签和日期"></a>文件头：文章名、目录、标签和日期</h1><p>任何一个文章都有它的出生地，我们需要在每篇博客前加上头文件形如，将<code>top</code>属性置位<code>True</code>可以实现<strong>置顶效果</strong></p><figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="attr">title:</span> <span class="string">博客标题</span></span><br><span class="line"><span class="attr">tags:</span> </span><br><span class="line"><span class="bullet">  -</span> <span class="string">标签1</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">标签2</span></span><br><span class="line"><span class="attr">categories:</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">一级目录</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">二级子目录</span></span><br><span class="line"><span class="bullet">  -</span> <span class="string">三级子目录</span></span><br><span class="line"><span class="attr">date:</span> <span class="number">2019</span><span class="bullet">-3</span><span class="bullet">-17</span></span><br><span class="line"><span class="attr">top:</span> <span class="literal">False</span></span><br><span class="line"><span class="meta">---</span></span><br></pre></td></tr></table></figure><p>关于目录结构暂时如下</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">站点:.       </span><br><span class="line">├─acm队伍相关 </span><br><span class="line">│  ├─基本说明 </span><br><span class="line">│  ├─训练计划 </span><br><span class="line">│  └─队伍总结 </span><br><span class="line">├─cm      </span><br><span class="line">│  ├─acm题解</span><br><span class="line">│  ├─日报</span><br><span class="line">│  └─......  </span><br><span class="line">├─key      </span><br><span class="line">│  ├─acm题解</span><br><span class="line">│  ├─日报</span><br><span class="line">│  └─......   </span><br><span class="line">├─xyw      </span><br><span class="line">│  ├─acm_题</span><br><span class="line">│  ├─日报</span><br><span class="line">│  └─......</span><br><span class="line">└─......</span><br></pre></td></tr></table></figure><p>为了方便检索管理，统一部分标签的使用</p><ul><li><p>cm/xyw/key：文章作者标签</p></li><li><p>acm题解：与acm题题解相关的博客</p></li><li><p>学习笔记：学习笔记</p></li><li><p>每日总结：每日总结</p></li><li><p>队伍总结：与队伍相关的总结</p></li><li><p>总结 or 心得 ：总结或者心得</p></li><li><p>教程：发布个人教程</p></li><li><p>杂谈：与学习知识没有直接相关的，比如思考的某些事，作品观后感，旅游心得或者自己最近的想法等，都行，灵活使用</p></li></ul><p>其他标签大家随意发挥</p><h1 id="图片"><a href="#图片" class="headerlink" title="图片"></a>图片</h1><p>如果已经学会使用markdown语法了，肯定知道，在插入图片的时候是需要图片地址的，特此规定一下，<strong>禁止将博客图片直接放到词博客项目的github地址上</strong>，可以push到个人仓库，也可以用一些图片资源托管网站注入<a href="https://imgurl.org/" target="_blank" rel="noopener">ImgURL</a></p><p><img src="https://b2.bmp.ovh/imgs/2019/08/b1719bf3683d8511.png" alt></p><h1 id="幻灯片"><a href="#幻灯片" class="headerlink" title="幻灯片"></a>幻灯片</h1><p>如果是纯幻灯片，基础用法如下,注意文件开头的<code>layout: slides</code>部分,<a href="https://dcmtruman.github.io/2019/07/30/test_slide/">预览地址</a></p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">---</span><br><span class="line">title: 一个幻灯片测试用例</span><br><span class="line">tags: </span><br><span class="line">  - 功能测试</span><br><span class="line">categories:</span><br><span class="line">  - 功能测试</span><br><span class="line">date: 2019-7-31</span><br><span class="line">layout: slides</span><br><span class="line">slide:</span><br><span class="line">  theme: night</span><br><span class="line">---</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># 按理说这是第一页</span><br><span class="line"></span><br><span class="line">- 1.1</span><br><span class="line">- 1.2</span><br><span class="line"></span><br><span class="line">--</span><br><span class="line"></span><br><span class="line">- 2.3</span><br><span class="line">- 2.3</span><br><span class="line"></span><br><span class="line">---</span><br><span class="line"></span><br><span class="line"># 按理说这是第二部分</span><br><span class="line"></span><br><span class="line">- 3.2</span><br><span class="line">- 3.3</span><br><span class="line"></span><br><span class="line">---</span><br><span class="line"></span><br><span class="line">hahaha</span><br></pre></td></tr></table></figure>]]></content>
+      
+      
+      <categories>
+          
+          <category> acm队伍相关 </category>
+          
+          <category> 基本说明 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> acm队伍相关 </tag>
+            
+            <tag> 教程 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>数据结构相关习题列表</title>
+      <link href="/2019/07/31/chairmantree_20190801/"/>
+      <url>/2019/07/31/chairmantree_20190801/</url>
+      
+        <content type="html"><![CDATA[<h1 id="一些可持久化线段树习题"><a href="#一些可持久化线段树习题" class="headerlink" title="一些可持久化线段树习题"></a>一些可持久化线段树习题</h1><ul><li><input disabled type="checkbox"> <strong>Bzoj 2653</strong>（可持久化线段树；二分答案；按数值大小更新对应位置的+1-1，每个元素对应一个线段树，求最大连续最短和）</li><li><input disabled type="checkbox"> <strong>Bzoj 3123</strong>(启发式合并)</li><li><input disabled type="checkbox"> <strong>codeforces 786C</strong> 算复杂度，倒插主席树</li><li><input disabled type="checkbox"> <strong>codeforces 538F</strong> 计算复杂度，主席树<a id="more"></a></li><li><input checked disabled type="checkbox"> Bzoj 1926（裸）</li><li><input checked disabled type="checkbox"> Bzoj 2588（裸）</li><li><input checked disabled type="checkbox"> Bzoj 3932(<strong>查询的时候跟k比较的是左节点数量！！！！！</strong>)</li><li><input disabled type="checkbox"> Bzoj 3674 可持久化并查集 ， 用线段树可持久化维护fa数组</li><li><input disabled type="checkbox"> Bzoj 3207 hash+主席树</li><li><input disabled type="checkbox"> Bzoj 2809 主席树+dfs序，枚举管理者，$nlog_{2}n$,我当时的想法是递归的时候孩子合并到父亲上，儿子递归完更新答案</li><li><input disabled type="checkbox"> HDU 3727 (裸)</li><li><input disabled type="checkbox"> HDU 4417 (裸)</li><li><input disabled type="checkbox"> HDU 4348 (枚举中位数位置)</li><li><input disabled type="checkbox"> <strong>codeforces 547E</strong> fail树，dfs序，可持久化线段树(做不了，暂时就先忽略了)</li></ul>]]></content>
+      
+      
+      <categories>
+          
+          <category> cm </category>
+          
+          <category> 数据结构 </category>
+          
+          <category> 主席树 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 主席树 </tag>
+            
+            <tag> 题目 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>cm_2019年8月1日</title>
+      <link href="/2019/07/31/cm_day_20190801_2/"/>
+      <url>/2019/07/31/cm_day_20190801_2/</url>
+      
+        <content type="html"><![CDATA[<h1 id="上午"><a href="#上午" class="headerlink" title="上午"></a>上午</h1><p>挑了几道题，同时补了一下之前在codeforces上遇到的一个题，标答给的做法是名次树，treap，实现使用stl，也因此，<code>treap</code>成了我这几天特别想学习的东西（之一），这个周末如果不忙，会去看看。</p><p>当然也有一种离线做法，需要提前处理出来询问，按照从小到大的顺序在权值线段树上询问和更新，也比较好理解，但是，今天还看到一个很棒的做法，代码量非常少，改天有空会专门写一下题解。</p><h1 id="下午"><a href="#下午" class="headerlink" title="下午"></a>下午</h1><p>吃完午饭后，和师弟开始研究习题，今天下午的学习方法是这样的，重点培养对于数据结构这一类题的思维能力，暂时先不开始敲（俗称，嘴巴ac）毕竟放在下午的话，可能思维上会了，但是调试一下午就很没有效率，我晚上或者其他空闲时间，在主要开始切一些这样的题。</p><p>看了很多bzoj的题，收获还是很多的，想大概说一下</p><a id="more"></a><h2 id="Bzoj-2653"><a href="#Bzoj-2653" class="headerlink" title="Bzoj-2653"></a>Bzoj-2653</h2><p>这道题很有意思，也加深了我对「可持久化线段树」的理解。</p><p>题目大意是，左端点给你一个可选范围，右端点给你一个可选范围，然后你决定左右端点，使得其形成的区间的中位数最大。</p><p>我想到二分中位数了，想着根据当前中位数，判断一下 左右区间+中间区间 能不能构成我这种中位数情况，说白了就是看一下比当前值<code>x</code>大的有多少个数，比<code>x</code>小的有多少个数，但由于是连续选取，所以突然有点懵不知道该怎么维护。</p><p>后来师弟说<strong>线段树最大连续子段和</strong>之后，再利用+1、-1这种数值记录的方式。仿佛有了点眉目。</p><p>题解做法是，初始一颗线段树，每个叶子结点是当前位置对应的信息，初始是全为+1，然后对于原序列，按照数值从小到大的顺序，更新这个线段树，每次更新，都去更新其在原数组中的位置，将其置位-1。</p><p>这样一来，对于任何一个在数组中的值，我都有一个包含区间信息的+1，-1线段树，更新使用可持久化思想，每次只更新部分信息，根据二分的值我们在此二分能找到一个与之对应的中位数，得到这个中位数下的求最大子段信息。</p><p>具体代码和做法，之后会补上。</p><p>很多人的解题博客上写着「主席树」，我觉得并不妥当，在这里向和传统主席树的应用做个比较。</p><table><thead><tr><th></th><th>区间第k大</th><th>此题</th></tr></thead><tbody><tr><td>维护信息</td><td>值域上每个数的分布</td><td>每个版本原数组区间的信息</td></tr><tr><td>根节点信息</td><td>将区间序列表示成一种有序的时间更新序列</td><td>按照数值排序，不断修改线段树，更新部分信息</td></tr><tr><td>利用</td><td>利用可减性，将「历史版本」变成「区间信息」</td><td>比较纯粹的「可持久化」思想，为了使用许多个不同版本的线段树</td></tr></tbody></table><h2 id="Bzoj-3932"><a href="#Bzoj-3932" class="headerlink" title="Bzoj-3932"></a>Bzoj-3932</h2><p>求区间前k小的和，这一部分不多说了，之所以也写在日报里是一个地方出了笔误，<strong>本来应该求左儿子的节点个数信息，我写成当前儿子了，实在是坑死我了</strong></p><p>其实主席树的一个特点，也可以让我们更好的去思考这类题，每次更新都是一个点，我们见到这样的题，完全可以先考虑，在这道题中，有没有什么操作是单点或者能转换成单点操作的。比如本题中，虽然线段是覆盖，但可以看成是左端点+一个值，右端点-一个值，就能按照题目中与时间有个的关键点维护权值线段树，得到不同时间点的前k大的和。</p><p>对于输入中任何一个时间点，二分找到小于等于它的最大的那个时间点，根据其对应的权值线段树，得到答案。</p><h2 id="Bzoj-3123"><a href="#Bzoj-3123" class="headerlink" title="Bzoj-3123"></a>Bzoj-3123</h2><p>启发式合并，一开始看到之后想过能不能暴力这么搞，但因为自己太菜+经验不足，就自我否定了这个想法，后来看到这个题的tag，才恍然大悟。</p><p>时候诸葛亮一下，又是始终保证森林，又是树上一个点接到另一个上面，明示合并能搞啊，这部分的复杂度$log_{2}n$，不该怂的，真的很巧妙啊。</p><hr><p>等下准备去更新一下 <strong>acm错误统计</strong>，然后睡觉！ </p>]]></content>
+      
+      
+      <categories>
+          
+          <category> cm </category>
+          
+          <category> 日报 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 主席树 </tag>
+            
+            <tag> 每日总结 </tag>
+            
+            <tag> cm </tag>
+            
+            <tag> 数据结构 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>xyw_2019年8月1日</title>
+      <link href="/2019/07/31/xyw_day_20190801/"/>
+      <url>/2019/07/31/xyw_day_20190801/</url>
+      
+        <content type="html"><![CDATA[<h1 id="20190801-总结"><a href="#20190801-总结" class="headerlink" title="20190801 总结"></a>20190801 总结</h1><p>嗯，结束了昨天的颓废生活，今天继续开开心心学东西</p><p>上午写了个树形背包，过了两个模板题（虽然调了很久</p><p>下午开始可持久化数据结构的学习，看了5道BZOJ的题</p><p>其中印象比较深的有middle那题</p><a id="more"></a><p>二分答案，把元素从小到大排序，然后依次建可持久化线段树，再查询区间的一些信息</p><p>感觉因为<strong>最后是针对值查询区间的一些信息的，所以应该用可持久化线段树来维护</strong>，</p><p><strong>可持久化权值线段树是以每个元素作为根，底层维护的是权值信息而不是区间信息</strong></p><p>任务优先级前k大的那个题</p><p>用排序扫描的思想做，思路基本能想明白的</p><p>然后最后那个启发式合并的感觉也特别棒，大致想清楚了复杂度的问题</p><p><strong>有时候在暴力的基础上加个启发式就是正解了</strong></p><p>晚上的DP训练，想了一个Zuma的做法，但是WA Test 5 了，最后是看题解补的，有点不敢确定为什么转移的式子写的这么简单，但它又确实是对的……</p><p><strong>转移的时候总是应该建立一个不重不漏的划分，然后分类讨论地转移</strong>，或许这种区间DP见到还是少了一些</p><p>树上的那个什么GCD&gt;1的情况下求距离最大的也不太会做，大致看明白了题解的思路</p><p>明天的话上午应该是继续写写树形背包，然后补补之前的题，下午继续刚可持久化数据结构，哦对，终于完全看明白了主席树的写法。</p><p><strong>这周的重中之重就是主席树！</strong></p>]]></content>
+      
+      
+      <categories>
+          
+          <category> xyw </category>
+          
+          <category> 日报 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 主席树 </tag>
+            
+            <tag> 每日总结 </tag>
+            
+            <tag> xyw </tag>
+            
+            <tag> 可持久化权值线段树 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>cm_2019年7月31日</title>
+      <link href="/2019/07/30/cm_day_20190801/"/>
+      <url>/2019/07/30/cm_day_20190801/</url>
+      
+        <content type="html"><![CDATA[<ol><li><p>因为胃疼原因去开了一些药.</p></li><li><p>补了两道主席树的题，模板基本可以不出错自己敲下来了，明天试一试把递归换成<code>while</code>循环，省去一些递归的自身开销，勉强算是一点微小的优化。发现，相比于把左右孩子之一接过来，在修改另一个孩子这种写法，一开始直接先全部拷贝过来，在修改需要改的节点，会在实现上优雅很多，「拷贝」这个操作，可以单写一个<code>copy</code>函数，也可以直接用结构体的赋值</p> <figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">update</span><span class="params">(<span class="keyword">int</span> lr,<span class="keyword">int</span> &amp;x,<span class="keyword">int</span> l,<span class="keyword">int</span> r,<span class="keyword">int</span> vl)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    x=++tot;tree[x]=tree[lr];tree[x].sum++;</span><br><span class="line">    <span class="keyword">if</span>(l == r)&#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">int</span> mid = (l + r)&gt;&gt; <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">if</span>(vl &lt;= mid)update(tree[lr].l,tree[x].l,l,mid,vl);</span><br><span class="line">    <span class="keyword">else</span> update(tree[lr].r,tree[x].r,mid+<span class="number">1</span>,r,vl);</span><br><span class="line">    <span class="comment">//tree[x].sum = tree[tree[x].l].sum + tree[tree[x].r].sum;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li></ol><a id="more"></a><ol start="3"><li><p>写了博客的使用说明，markdown语法基本说明，规划了一下目录结构等，希望以后这个博客能用起来，队友也可以在这个博客上发文章，无论是否有关acm，。我以后会以此博客为主力博客。</p></li><li><p>有点想日后在博客上加上相册功能，但还没找到免费好用且不限量的图片托管平台。</p></li></ol>]]></content>
+      
+      
+      <categories>
+          
+          <category> cm </category>
+          
+          <category> 日报 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 主席树 </tag>
+            
+            <tag> 每日总结 </tag>
+            
+            <tag> cm </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>一个幻灯片测试用例</title>
+      <link href="/2019/07/30/test_slide/"/>
+      <url>/2019/07/30/test_slide/</url>
+      
+        <content type="html"><![CDATA[<h1 id="按理说这是第一页"><a href="#按理说这是第一页" class="headerlink" title="按理说这是第一页"></a>按理说这是第一页</h1><ul><li>1.1</li><li>1.2</li></ul><p>–</p><ul><li>2.3</li><li>2.3</li></ul><hr><h1 id="按理说这是第二部分"><a href="#按理说这是第二部分" class="headerlink" title="按理说这是第二部分"></a>按理说这是第二部分</h1><ul><li>3.2</li><li>3.3</li></ul><hr><p>hahaha</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 功能测试 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 功能测试 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+  
+  
+</search>
