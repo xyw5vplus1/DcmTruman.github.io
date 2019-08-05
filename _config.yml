@@ -77,6 +77,8 @@ theme: melody
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
+sitemap:
+  path: sitemap.xml
 deploy:
   type:git
   repository:git@github.com:DcmTruman/DcmTruman.github.io.git
