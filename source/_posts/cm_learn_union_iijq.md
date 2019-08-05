@@ -1,5 +1,5 @@
 ---
-title: cm_可持久化并查集 && BZOJ 3657 题解
+title: cm_可持久化并查集学习笔记 && BZOJ 3657 题解
 tags: 
   - acm
   - 并查集
@@ -13,7 +13,7 @@ categories:
 date: 2019-8-5
 top: False
 ---
-# 可持久化并查集 && BZOJ 3657 题解
+# cm_可持久化并查集学习笔记 && BZOJ 3657 题解
 
 ## 问题描述
 
