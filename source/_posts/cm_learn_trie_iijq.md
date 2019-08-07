@@ -8,7 +8,7 @@ categories:
   - cm
   - 数据结构
   - 可持久trie树
-date: 2019-8-6
+date: 2019-8-7
 top: False
 ---
 
