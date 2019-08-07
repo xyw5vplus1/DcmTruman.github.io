@@ -98,12 +98,11 @@ int query(int x,int k,int val,int limit)
 		else return query(T[x].lc,k-1,val,limit);
 	}
 }
+char sss[5];
 int main()
 {
     scanf("%d%d",&n,&m);
-    root[0] = ++tot;
-    T[root[0]].latest = -1;
-    T[root[0]].lc = T[root[0]].rc = 0;
+    T[0].latest=-1;
     for(int i = 1;i<=n;i++){
     	scanf("%d",&arr[i]);
     	s[i] = s[i-1] ^ arr[i];
@@ -112,8 +111,8 @@ int main()
 	int now_len = n;
 	char cc;int x,ql,qr;
 	for(int i = 1;i<=m;i++){
-		cin >> cc;
-		if(cc == 'A'){
+		scanf("%s",sss);
+		if(sss[0] == 'A'){
 			now_len ++;
 			scanf("%d",&x);
 			s[now_len] = s[now_len - 1] ^ x;
