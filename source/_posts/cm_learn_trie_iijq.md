@@ -1,5 +1,5 @@
 ---
-title: cm_可持久化trie树学习笔记 + BZOJ 3261题解
+title: cm_可持久化trie树学习笔记 + BZOJ 3261/P4592 [TJOI2018]题解
 tags: 
   - acm
   - 可持久化trie树
@@ -12,7 +12,7 @@ date: 2019-8-6
 top: False
 ---
 
-# cm_可持久化trie树学习笔记 + BZOJ 3261题解
+# cm_可持久化trie树学习笔记 + BZOJ 3261/P4592 [TJOI2018]题解
 
 *主席树的题，虽然嘴巴ac了不少，但是还是得练啊*
 
@@ -195,5 +195,164 @@ int main() {
     }
   }
   return 0;
+}
+```
+
+## P4592 [TJOI2018]
+
+还有一个题是树上的查询，有两种查询方式，一种是在子树中选一个数与$x$异或最大，这个可以通过dfs序转成区间问题，还有一种路径查询的，思想和树上主席树一样
+
+[原题链接](https://www.luogu.org/problem/P4592)
+
+```c++
+#include <iostream>
+#include <stdio.h>
+#include <stdio.h>
+using namespace std;
+
+const int maxn = 600020;
+const int K = 31;
+int fa[maxn][20],deep[maxn],vis[maxn];
+int root_arr[maxn],root_tree[maxn];
+struct node{
+    int lc,rc,cnt,val;
+}T[maxn * 32];
+struct _edge{
+    int to,next;
+}edge[maxn];
+int root[maxn],head[maxn],tot,cnt,m,n;
+void addedge(int u,int v){
+   edge[cnt].to = v;
+   edge[cnt].next = head[u];
+   head[u] = cnt ++; 
+}
+void init(int n){
+    cnt = 0;
+    for(int i = 0;i<=n;i++){
+        head[i] = -1;
+    }
+}
+int dsz;
+int in[maxn],out[maxn],id[maxn],v[maxn];
+int xxor[maxn];
+int lca(int u,int v)
+{
+    if(deep[u] < deep[v])swap(u,v);
+    int dis = deep[u] - deep[v];
+    for(int i = 0;i<20;i++){
+        if((1<<i)&dis)u = fa[u][i];
+    }
+    if(u == v)return u;
+    for(int i = 19;i>=0;i--){
+        if(fa[u][i] != fa[v][i]){
+            u = fa[u][i];
+            v = fa[v][i];            
+        }
+    }
+    return fa[u][0];
+}
+void update(int y,int &x,int val,int k)
+{
+    // cout << y << endl;
+    x = ++tot;T[x] = T[y];T[x].cnt ++;
+    if(k < 0){
+        T[x].val = val;
+        return;
+    }
+    int c = (val >> k) & 1;
+    if(!c){
+        update(T[y].lc,T[x].lc,val,k-1);
+    }else{
+        update(T[y].rc,T[x].rc,val,k-1);
+    }
+}
+void dfs(int now)
+{
+    vis[now] = true;
+    in[now] = ++dsz; 
+    id[dsz] = now;
+    for(int i = 1;i<20;i++){
+        if(deep[now] < (1<<i))break;
+        fa[now][i] = fa[fa[now][i-1]][i-1];
+    }
+    for(int i = head[now];~i;i=edge[i].next){
+        int to = edge[i].to;
+        if(!vis[to]){
+            fa[to][0] = now;
+            deep[to] = deep[now] + 1;
+            update(root_tree[now],root_tree[to],v[to],K);
+            dfs(to);
+        }
+    }
+    out[now] = dsz;
+}
+int query_arr(int y,int x,int val,int k,int ret=0)
+{
+    //cout << y << " " << x << " " << val << " " << k << endl;
+    if(k < 0)return T[x].val ^ val;
+    int c = (val >> k) & 1;
+    if(c){
+        int cnt = T[T[x].lc].cnt - T[T[y].lc].cnt;
+        if(cnt > 0)return query_arr(T[y].lc,T[x].lc,val,k-1,ret+(1<<k));
+        else return query_arr(T[y].rc,T[x].rc,val,k-1,ret);
+    }else{
+        int cnt = T[T[x].rc].cnt - T[T[y].rc].cnt;
+        if(cnt > 0)return query_arr(T[y].rc,T[x].rc,val,k-1,ret+(1<<k));
+        else return query_arr(T[y].lc,T[x].lc,val,k-1,ret);
+    }
+}
+int query_path(int y,int x,int f,int ff,int val,int k,int ret=0)
+{
+    if(k < 0){return ret;}
+    int c = (val >> k) & 1;
+    if(c){
+        int cnt = T[T[x].lc].cnt + T[T[y].lc].cnt - T[T[f].lc].cnt - T[T[ff].lc].cnt;
+        //cout << k << " left " << cnt<<endl;
+        if(cnt > 0)return query_path(T[y].lc,T[x].lc,T[f].lc,T[ff].lc,val,k-1,ret+(1<<k));
+        else return query_path(T[y].rc,T[x].rc,T[f].rc,T[ff].rc,val,k-1,ret);
+    }else{
+        int cnt = T[T[x].rc].cnt + T[T[y].rc].cnt - T[T[f].rc].cnt - T[T[ff].rc].cnt;
+        //cout << k << " right " << cnt << endl;
+        if(cnt > 0)return query_path(T[y].rc,T[x].rc,T[f].rc,T[ff].rc,val,k-1,ret+(1<<k));
+        else return query_path(T[y].lc,T[x].lc,T[f].lc,T[ff].lc,val,k-1,ret);
+    }
+}
+void build(int &x,int k)
+{
+    cout << k << endl;
+    x = ++tot;T[x].cnt = 0;
+    if(k<0)return;
+    build(T[x].lc,k-1);
+    build(T[x].rc,k-1);
+}
+int main()
+{
+   scanf("%d%d",&n,&m); 
+   init(n);
+   for(int i = 1;i<=n;i++)scanf("%d",&v[i]);
+   for(int i = 0;i<n-1;i++){
+       int xx,yy;scanf("%d%d",&xx,&yy);
+       addedge(xx,yy);addedge(yy,xx);
+   }
+   update(root_tree[0],root_tree[1],v[1],K);
+   dfs(1);
+   for(int i = 1;i<=dsz;i++){
+       xxor[i] =  v[id[i]];
+       update(root_arr[i-1],root_arr[i],xxor[i],K);
+   }
+   int op,qx,qy,qz;
+   while(m--){
+       scanf("%d",&op);
+       if(op == 1){
+          scanf("%d%d",&qx,&qy);
+          printf("%d\n",query_arr(root_arr[in[qx] - 1] , root_arr[out[qx]],qy,K)); 
+       }else{
+           scanf("%d%d%d",&qx,&qy,&qz);
+           int fx = lca(qx,qy);
+           int ffx = fa[fx][0];
+        //    cout << fx << " " << ffx << endl;
+           printf("%d\n",query_path(root_tree[qx],root_tree[qy],root_tree[fx],root_tree[ffx],qz,K));
+       }
+   }
 }
 ```
