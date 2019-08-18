@@ -1,10 +1,10 @@
 ---
-title: key_数论学习笔记
+title: Key_数论学习笔记
 tags: 
   - 数论
   - 学习笔记
 categories:
-  - key
+  - Key
   - 数学
   - 数论
 date: 2019-8-14
@@ -23,7 +23,7 @@ inline ll quick_mul(ll x,ll y ll mod)
 }
 ```
 
-------
+---
 
 #### 素数筛
 
@@ -65,7 +65,7 @@ void primes(int n)
 }
 ```
 
-------
+---
 
 #### 质因数分解
 
@@ -85,7 +85,7 @@ void divide(int n)
 }
 ```
 
-------
+---
 
 #### 约数
 
@@ -123,7 +123,7 @@ int gcd(int a,int b)
 }
 ```
 
-------
+---
 
 #### 欧拉函数
 
@@ -147,7 +147,7 @@ int phi(int n)
 - $\forall n>1,1$ ~ $n$ 中与 $n$ 互质的数的和为 $n*\varphi(n)/2$
 - $\sum_{d|n}\varphi(d)=n$
 
-------
+---
 
 #### 欧拉定理
 
@@ -161,14 +161,14 @@ int phi(int n)
 
 若正整数 $a,n$ 不一定互质且 $b>\varphi(n)$，有 $a^b\equiv a^{b\ mod\ \varphi(n)+\varphi(n)}(mod\ n)$
 
-> *原因：*
-> *不管 $a,n$ 是否互质，$a^bmod\ n$ 均有* ***指数循环节* ** *，循环节长度为 $\varphi(n)$ 的约数。*
-> *互质时循环从头开始*.
-> *不互质时不循环的长度不超过 $\varphi(n)$.*
+>*原因：*
+>*不管 $a,n$ 是否互质，$a^bmod\ n$ 均有* ***指数循环节* ** *，循环节长度为 $\varphi(n)$ 的约数。*
+>*互质时循环从头开始*.
+>*不互质时不循环的长度不超过 $\varphi(n)$.*
 
 若正整数 $a,n$ 互质,则满足 $a^{x}\equiv1(mod\ n)$ 的 $x$ 的最小值有 $x|\varphi(n)$
 
-------
+---
 
 #### 扩展欧几里得
 
@@ -190,7 +190,7 @@ int exgcd(int a,int b,int &x,int &y)
 
 **通解：** $x=\frac{c}{d}x_0+k\frac{b}{d},y=\frac{c}{d}y_0+k\frac{a}{d}$ , $k$ 取遍整数集合，$d=gcd(a,b)$ ,$x_0,y_0$ 是 $ax+by=gcd(a,b)$ 的一组特解
 
-------
+---
 
 #### 乘法逆元
 
@@ -200,7 +200,7 @@ $x$ 为 $b$ 的模 $m$ **乘法逆元**，记为 $b^{-1}(mod\ m)$ ,有 $b*x\equi
 求 $x$ 时，若 $m$ 为质数且 $b<m$ ，$b^{m-2}$  则为乘法逆元.
 若 $b,m$ 只保证互质，则要求解同余方程 $b*x\equiv1\ (mod\ m)$ 或 $b^{\varphi(m)-1}$
 
-------
+---
 
 #### 线性同余方程
 
@@ -208,7 +208,24 @@ $x$ 为 $b$ 的模 $m$ **乘法逆元**，记为 $b^{-1}(mod\ m)$ ,有 $b*x\equi
 
 $gcd(a,m)|b$ 时有解，解为 $a*x+m*y=b$ 的解
 
-------
+---
+
+#### 中国剩余定理
+
+$m_1,m_2,m_3...m_n$两两互质时，对于
+$$
+\left\{
+\begin{align}
+x\equiv a_1(mod\ m_1)\\
+x\equiv a_2(mod\ m_2)\\
+\cdots\\
+x\equiv a_n(mod\ m_n)\\
+\end{align}
+\right.
+$$
+解为$x=\sum^{n}_{i=1}a_iM_it_i$ ，$t_i$ 为方程 $M_it_i\equiv1\ (mod\ m_i)$ 的一个解
+
+---
 
 #### 高次同余方程
 
@@ -240,5 +257,4 @@ int bsgs(int a,int b,int p)
     return -1;
 }
 ```
-
-------
+---
