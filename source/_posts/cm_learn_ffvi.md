@@ -228,7 +228,7 @@ int main()
 
 
 
-##[2019牛客多校第三场 Removing Stones](https://ac.nowcoder.com/acm/contest/883/G)
+## [2019牛客多校第三场 Removing Stones](https://ac.nowcoder.com/acm/contest/883/G)
 
 给了一个游戏，balabala说了一堆规则，大家对于游戏规则部分，可以去看一下原题，仔细思考一下。但抽象出来之后，让你统计有多少个区间，最大值大于区间总和的一半。
 
