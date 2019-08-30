@@ -38,3 +38,56 @@ top: False
 - [x] POJ 3261 找到尽可能长的子串，该子串至少出现k次（可重叠）, 二分长度，按照长度分组，每组个数表示出现多少次，判断存不存在个数大于等于k的即可
 - [x] SPOJ - REPEATS 重复次数最多的连续重复子串，论文里有，讲的比较清楚了。这里有个实现上的点，往后匹配尽可能多的字符，我们可以通过后缀字符得到，往前匹配尽可能多的字符如何做呢？一开始我的想法是反串在建一个后缀数组，就是多个常数的事，确实也可以。别人的题解里，比如当前枚举的长度是L，只需要看一下匹配长度%枚举长度多出来几个字符，就再往前查看（L - 多出来的字符）,判断能不能再凑一个循环节，以利用这些多出来的字符即可。可是为什么只用查看这些而不全匹配呢？因为如果往前会匹配到更多的，那么在之前的枚举中我们必然已经遇到过了。这部分如果不太理解那就反串再建一遍好了。
 - [x] HDU 5008 找出本质不同的字符串中，第k小的，输出左右端点。如果有多个，输出左端点最小的那个。处理除了对于每个后缀，每次新增多少个，因为后缀数组本来就是字典序，所以二分就行了，但同时也要往后枚举一下，看看后面是否有左端点更小的。
+
+顺便贴一发我的板子,字符串下标从0开始，Rank数组、sa数组和height下标才1开始，sa数组的值（即原始字符串位置）从0开始
+
+```c++
+int wa[N],wb[N],Ws[N],wv[N];
+int Rank[N],height[N],root[N],n,m,st[maxn][25];
+int k;
+void DA(int *r,int *sa,int n,int m){ 
+    int i,j,p,*x=wa,*y=wb,*t;
+    for(i=0;i<m;i++) Ws[i]=0;
+    for(i=0;i<n;i++) Ws[x[i]=r[i]]++;
+    for(i=1;i<m;i++) Ws[i]+=Ws[i-1];
+    for(i=n-1;i>=0;i--) sa[--Ws[x[i]]]=i; 
+    for(j=1,p=1;p<n;j*=2,m=p) 
+    {
+        for(p=0,i=n-j;i<n;i++) y[p++]=i; 
+        for(i=0;i<n;i++) if(sa[i]>=j) y[p++]=sa[i]-j; 
+        for(i=0;i<n;i++) wv[i]=x[y[i]];
+        for(i=0;i<m;i++) Ws[i]=0;
+        for(i=0;i<n;i++) Ws[wv[i]]++;
+        for(i=1;i<m;i++) Ws[i]+=Ws[i-1];
+        for(i=n-1;i>=0;i--) sa[--Ws[wv[i]]]=y[i];  
+        for(t=x,x=y,y=t,p=1,x[sa[0]]=0,i=1;i<n;i++)
+            x[sa[i]]=cmp(y,sa[i-1],sa[i],j)?p-1:p++;  
+    }
+}
+
+void calheight(int *r,int *sa,int n){ 
+    int i,j,k=0;       
+    for(i=1;i<=n;i++) Rank[sa[i]]=i;  
+    for(i=0;i<n; height[Rank[i++]] = k ) 
+    for(k?k--:0,j=sa[Rank[i]-1]; r[i+k]==r[j+k]; k++); 
+} 
+
+string sta[N];
+char str[N];
+int r[N];
+ll r2[N];
+ll pre[N];
+int sa[N];
+int getmin(int x,int y)
+{
+    //cout << x << " " << y << " ";
+    if(x == y)return n - sa[x];
+    if(x > y)swap(x,y);
+	x ++;
+    int ln = log2(y - x  + 1);
+    int ret = min(st[x][ln] , st[y - (1 << ln) + 1][ln]);
+	//cout << ret << endl;
+	return ret;
+}
+
+```
