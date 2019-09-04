@@ -38,10 +38,14 @@ top: False
 - [x] POJ 3261 找到尽可能长的子串，该子串至少出现k次（可重叠）, 二分长度，按照长度分组，每组个数表示出现多少次，判断存不存在个数大于等于k的即可
 - [x] SPOJ - REPEATS 重复次数最多的连续重复子串，论文里有，讲的比较清楚了。这里有个实现上的点，往后匹配尽可能多的字符，我们可以通过后缀字符得到，往前匹配尽可能多的字符如何做呢？一开始我的想法是反串在建一个后缀数组，就是多个常数的事，确实也可以。别人的题解里，比如当前枚举的长度是L，只需要看一下匹配长度%枚举长度多出来几个字符，就再往前查看（L - 多出来的字符）,判断能不能再凑一个循环节，以利用这些多出来的字符即可。可是为什么只用查看这些而不全匹配呢？因为如果往前会匹配到更多的，那么在之前的枚举中我们必然已经遇到过了。这部分如果不太理解那就反串再建一遍好了。
 - [x] HDU 5008 找出本质不同的字符串中，第k小的，输出左右端点。如果有多个，输出左端点最小的那个。处理除了对于每个后缀，每次新增多少个，因为后缀数组本来就是字典序，所以二分就行了，但同时也要往后枚举一下，看看后面是否有左端点更小的。
+- [x] 2018南京现场赛M ：把s串翻转，拼上#t串，然后相当于是求每个s'的位置和t位置的最长公共前缀，在乘上该位置为右端点的回文串的个数，上个回文自动机就行了
 
 顺便贴一发我的板子,字符串下标从0开始，Rank数组、sa数组和height下标才1开始，sa数组的值（即原始字符串位置）从0开始。DA的参数n是原始字符串长度+1，r数组切记把`r[n]`置为一个未出现的数字
 
 ```c++
+int cmp(int *r,int a,int b,int l){
+    return (r[a]==r[b]) && (r[a+l]==r[b+l]);
+}
 int wa[N],wb[N],Ws[N],wv[N];
 int Rank[N],height[N],root[N],n,m,st[maxn][25];
 int k;
@@ -89,5 +93,196 @@ int getmin(int x,int y)
 	//cout << ret << endl;
 	return ret;
 }
+```
 
+DC3的板子
+
+```c++
+struct DA{
+    #define F(x) ((x)/3+((x)%3==1?0:tb))
+    #define G(x) ((x)<tb?(x)*3+1:((x)-tb)*3+2)
+    int sa[maxn*6],rank[maxn*6],height[maxn*6],str[maxn*6];
+    int wa[maxn*6],wb[maxn*6],wv[maxn*6],wss[maxn*6];
+    int c0(int *r,int a,int b){
+        return r[a]==r[b]&&r[a+1]==r[b+1]&&r[a+2]==r[b+2];
+    }
+    int c12(int k,int *r,int a,int b){
+        if(k==2)
+            return r[a]<r[b]||(r[a]==r[b]&&c12(1,r,a+1,b+1));
+        else return r[a]<r[b]||(r[a]==r[b]&&wv[a+1]<wv[b+1]);
+    }
+    void sort(int *r,int *a,int *b,int n,int m){
+        int i;
+        for(i=0;i<n;i++)wv[i]=r[a[i]];
+        for(i=0;i<m;i++)wss[i]=0;
+        for(i=0;i<n;i++)wss[wv[i]]++;
+        for(i=1;i<m;i++)wss[i]+=wss[i-1];
+        for(i=n-1;i>=0;i--)
+            b[--wss[wv[i]]]=a[i];
+    }
+    void dc3(int *r,int *sa,int n,int m){
+        int i,j,*rn=r+n;
+        int *san=sa+n,ta=0,tb=(n+1)/3,tbc=0,p;
+        r[n]=r[n+1]=0;
+        for(i=0;i<n;i++)if(i%3!=0)wa[tbc++]=i;
+        sort(r+2,wa,wb,tbc,m);
+        sort(r+1,wb,wa,tbc,m);
+        sort(r,wa,wb,tbc,m);
+        for(p=1,rn[F(wb[0])]=0,i=1;i<tbc;i++)
+            rn[F(wb[i])]=c0(r,wb[i-1],wb[i])?p-1:p++;
+        if(p<tbc)dc3(rn,san,tbc,p);
+        else for(i=0;i<tbc;i++)san[rn[i]]=i;
+        for(i=0;i<tbc;i++)if(san[i]<tb)wb[ta++]=san[i]*3;
+        if(n%3==1)wb[ta++]=n-1;
+        sort(r,wb,wa,ta,m);
+        for(i=0;i<tbc;i++)wv[wb[i]=G(san[i])]=i;
+        for(i=0,j=0,p=0;i<ta&&j<tbc;p++)
+            sa[p]=c12(wb[j]%3,r,wa[i],wb[j])?wa[i++]:wb[j++];
+        for(;i<ta;p++)sa[p]=wa[i++];
+        for(;j<tbc;p++)sa[p]=wb[j++];
+    }
+    void da(int n,int m){
+        for(int i=n;i<n*3;i++)str[i]=0;
+        dc3(str,sa,n+1,m);
+        int i,j,k=0;
+        for(i=0;i<=n;i++)rank[sa[i]]=i;
+        for(i=0;i<n;i++){
+            if(k)k--;
+            j=sa[rank[i]-1];
+            while(str[i+k]==str[j+k])k++;
+            height[rank[i]]=k;
+        }
+    }
+    void print(int n){
+        cout<<"sa[] ";
+        for(int i=0;i<=n;i++)cout<<sa[i]<<" ";cout<<endl;
+        cout<<"rank[] ";
+        for(int i=0;i<=n;i++)cout<<rank[i]<<" ";cout<<endl;
+        cout<<"height[] ";
+        for(int i=0;i<=n;i++)cout<<height[i]<<" ";cout<<endl;
+    }
+}DA;
+```
+
+顺便贴一发自己回文自动机的板子
+
+```c++
+struct Palindromic_Tree {
+    int next[MAXN][CHARN] ;//next指针，next指针和字典树类似，指向的串为当前串两端加上同一个字符构成
+    int fail[MAXN] ;//fail指针，失配后跳转到fail指针指向的节点
+    int cnt[MAXN] ;
+    int num[MAXN] ;
+    int len[MAXN] ;//len[i]表示节点i表示的回文串的长度
+    int S[MAXN] ;//存放添加的字符
+    int last ;//指向上一个字符所在的节点，方便下一次add
+    int n ;//字符数组指针
+    int p ;//节点指针
+
+    int newnode ( int l ) {//新建节点
+        for ( int i = 0 ; i < CHARN ; ++ i ) next[p][i] = 0 ;
+        cnt[p] = 0 ;
+        num[p] = 0 ;
+        len[p] = l ;
+        return p ++ ;
+    }
+
+    void init () {//初始化
+        p = 0 ;
+        newnode (  0 ) ;
+        newnode ( -1 ) ;
+        last = 0 ;
+        n = 0 ;
+        S[n] = -1 ;//开头放一个字符集中没有的字符，减少特判
+        fail[0] = 1 ;
+    }
+
+    int get_fail ( int x ) {//和KMP一样，失配后找一个尽量最长的
+        while ( S[n - len[x] - 1] != S[n] ) x = fail[x] ;
+        return x ;
+    }
+
+    int add ( int c ) {
+        //c -= 'a' ;
+        S[++ n] = c ;
+        int cur = get_fail ( last ) ;//通过上一个回文串找这个回文串的匹配位置
+        if ( !next[cur][c] ) {//如果这个回文串没有出现过，说明出现了一个新的本质不同的回文串
+            int now = newnode ( len[cur] + 2 ) ;//新建节点
+            fail[now] = next[get_fail ( fail[cur] )][c] ;//和AC自动机一样建立fail指针，以便失配后跳转
+            next[cur][c] = now ;
+            num[now] = num[fail[now]] + 1 ;
+        }
+        last = next[cur][c] ;
+        cnt[last] ++ ;
+		return num[last];
+    }
+
+    void count () {
+        for ( int i = p - 1 ; i >= 0 ; -- i ) cnt[fail[i]] += cnt[i] ;
+        //父亲累加儿子的cnt，因为如果fail[v]=u，则u一定是v的子回文串！
+    }
+} pat;
+
+```
+
+顺便贴一发后缀自动机的板子
+
+```c++
+const int maxn = 1e6 + 20;
+const ll MOD = 1e9+7;
+struct SAM{
+	#define CHAR_NUM 26
+	int fa[maxn << 1] , ch[maxn << 1][CHAR_NUM] , len[maxn << 1];
+	int siz[maxn << 1];//right num
+	int sum[maxn << 1];//path num
+	int t[maxn << 1] , A[maxn << 1];
+	int lst , node;
+	void init(){
+		lst = node = 1;
+		memset(fa , 0 , sizeof(fa));
+		memset(ch , 0 , sizeof(ch));
+		memset(len , 0 , sizeof(len));
+		memset(siz , 0 , sizeof(siz));
+	}
+	void insert(int c){
+		//------
+		if(ch[lst][c]&&len[ch[lst][c]] == len[lst] + 1){
+			lst = ch[lst][c];siz[lst] ++;return;
+		}
+		//------
+		int f = lst , p = ++node;lst = p;
+		len[p] = len[f] + 1;siz[p] = 1;
+		//------
+		while(f && !ch[f][c]){ch[f][c] = p;f = fa[f];}
+		if(!f){fa[p]=1;return;}
+		//------
+		int x = ch[f][c] , y = ++node;
+		if(len[f] + 1 == len[x]){fa[p] = x;node -- ;return;}
+		//------
+		len[y] = len[f] + 1;fa[y] = fa[x];fa[x] = fa[p] = y;
+		memcpy(ch[y] , ch[x] , sizeof(ch[y]));
+		while(f && ch[f][c] == x){ch[f][c] = y ; f = fa[f];}
+	}
+	void ssort(){
+		//small --- > big
+		for(int i=1;i<=node;i++) t[len[i]]++;
+		for(int i=1;i<=node;i++) t[i]+=t[i-1];
+		for(int i=1;i<=node;i++) A[t[len[i]]--]=i;
+	}
+	void getsiz(){
+		for(int i = node;i>=1;i--){
+			siz[fa[A[i]]] += siz[A[i]];
+		}
+	}
+	void getsum(){
+		sum[1] = 1;
+		for(int i = 1;i <= node;i++){
+			for(int j = 0 ; j < CHAR_NUM  ; j++){
+				if(ch[A[i]][j]){
+					sum[ch[A[i]][j]] += sum[A[i]];
+				}
+			}
+		}
+	}
+	
+}sam;
 ```
