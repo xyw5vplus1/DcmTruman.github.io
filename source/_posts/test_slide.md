@@ -7,7 +7,7 @@ categories:
 date: 2019-7-31
 layout: slides
 slide:
-  theme: night
+  theme: white
 ---
 
 
