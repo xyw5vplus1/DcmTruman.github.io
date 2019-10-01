@@ -316,7 +316,7 @@ struct Palindromic_Tree {
 
 邻接表版本
 
-```
+```c++
 struct link_list{
     int u[MAXN], v[MAXN], nxt[MAXN], head[MAXN], tot, i;
     void _clear(){
