@@ -181,6 +181,7 @@ struct DA{
 - [x] HDU 4416 : 原串S建后缀自动机，然后不断拿着模式串T，去更新节点上的deep值。deep值表示，这些模式串中，到当前节点能匹配到的最大的长度。然后拓扑排序之后，每个节点都向father更新deep值的max。最后对于每个节点，如果deep为0，答案就加上当前节点所代表的子串，不过不为0，答案就加上当前节点所代表的子串到所匹配到的最大子串之前的这些子串，也就是`len[i] - deep[i]`，不过我怕算重，更新的是`len[i] - max(len[fa[i]] , deep[i])`,两种都能AC，后来想了想也确实如此。
 - [x] [APIO2014](https://www.luogu.org/problem/P3649) 统计每个本质不同的回文串的出现次数和长度，然后输出乘积的最大值。注意儿子会对父亲有贡献，所以还要再把贡献累加上
 
+
 顺便贴一发后缀自动机的板子
 
 ```c++
@@ -250,10 +251,12 @@ struct SAM{
 - [x] URAL 2040 : 裸题，每次添加字符，至多只会新增一个本质不同的回文子串，被卡时间卡空间，我要恶心死了
 - [x] [P4555](https://www.luogu.org/problem/P4555) 国家集训队 最长双回文串 ： 正串跑回文树，求出s[i],si[i]表示当前点为右端点的最长的回文子串，反串跑回文树，求ti[i]，表示左端点的最长回文子串，然后遍历一遍求个mx即可`mx = max(mx , si[i] + ti[i + 1])`
 - [x] [P1659 国家集训队 拉拉队排练](https://www.luogu.org/problem/P1659) : 通过回文自动机求出每个长度的回文串有多少个，然后算答案快速幂一下就行
+- [x] Palisection CodeForces - 17E : 统计有多少对回文串是相交的。我们只需要求出来不相交的对就行了。用`sum[i]`表示，0~i的字符串中有多少回文串，`pos[i]` 表示以`i`为**左端点**的回文串有多少个，`sum[i] * pos[i+1]`的总和就是不相交的回文串对数，用总对数交掉就可以了。因为内存问题，所以这里用了邻接表，等下也会贴出来这部分，复杂度比传统的略高。
 
 顺便贴一发自己回文自动机的板子
 
 ```c++
+
 struct Palindromic_Tree {
     int next[MAXN][CHARN] ;//next指针，next指针和字典树类似，指向的串为当前串两端加上同一个字符构成
     int fail[MAXN] ;//fail指针，失配后跳转到fail指针指向的节点
@@ -301,6 +304,91 @@ struct Palindromic_Tree {
         last = next[cur][c] ;
         cnt[last] ++ ;
 		return num[last];
+    }
+
+    void count () {
+        for ( int i = p - 1 ; i >= 0 ; -- i ) cnt[fail[i]] += cnt[i] ;
+        //父亲累加儿子的cnt，因为如果fail[v]=u，则u一定是v的子回文串！
+    }
+} pat;
+
+```
+
+邻接表版本
+
+```
+struct link_list{
+    int u[MAXN], v[MAXN], nxt[MAXN], head[MAXN], tot, i;
+    void _clear(){
+        memset(head, -1, sizeof head);
+        tot = 0;
+    }
+    void _clear(int x){head[x] = -1; }
+    int get(int x, int y){
+        for(i = head[x]; i != -1; i = nxt[i]){
+            if(u[i] == y) return v[i];
+        }
+        return 0;
+    }
+    void  _insert(int x, int y, int z){
+        u[tot] = y, v[tot] = z;
+        nxt[tot] = head[x];
+        head[x] = tot++;
+    }
+};
+struct Palindromic_Tree {
+	link_list nxt;
+    int fail[MAXN] ;//fail指针，失配后跳转到fail指针指向的节点
+    int cnt[MAXN] ;
+    int num[MAXN] ;
+    int len[MAXN] ;//len[i]表示节点i表示的回文串的长度
+    int S[MAXN] ;//存放添加的字符
+    int last ;//指向上一个字符所在的节点，方便下一次add
+    int n ;//字符数组指针
+    int p ;//节点指针
+
+    int newnode ( int l ) {//新建节点
+		nxt._clear(p);
+        cnt[p] = 0 ;
+        num[p] = 0 ;
+        len[p] = l ;
+        return p ++ ;
+    }
+
+    void init () {//初始化
+		nxt._clear();
+        p = 0 ;
+        newnode (  0 ) ;
+        newnode ( -1 ) ;
+        last = 0 ;
+        n = 0 ;
+        S[n] = -1 ;//开头放一个字符集中没有的字符，减少特判
+        fail[0] = 1 ;
+    }
+
+    int get_fail ( int x ) {//和KMP一样，失配后找一个尽量最长的
+        while ( S[n - len[x] - 1] != S[n] ) x = fail[x] ;
+        return x ;
+    }
+
+    int add ( int c ) {
+        //c -= 'a' ;
+        S[++ n] = c ;
+        int cur = get_fail ( last ) ;//通过上一个回文串找这个回文串的匹配位置
+		if(!nxt.get(cur,c)){
+        //if ( !next[cur][c] ) {//如果这个回文串没有出现过，说明出现了一个新的本质不同的回文串
+            int now = newnode ( len[cur] + 2 ) ;//新建节点
+			int tmp = get_fail(fail[cur]);
+			fail[now] = nxt.get(tmp,c);
+            //fail[now] = next[get_fail ( fail[cur] )][c] ;//和AC自动机一样建立fail指针，以便失配后跳转
+			nxt._insert(cur,c,now);
+            //next[cur][c] = now ;
+            num[now] = num[fail[now]] + 1 ;
+        }
+        //last = next[cur][c] ;
+		last = nxt.get(cur,c);
+        cnt[last] ++ ;
+		return last;
     }
 
     void count () {
