@@ -254,6 +254,7 @@ struct SAM{
 - [x] Palisection CodeForces - 17E : 统计有多少对回文串是相交的。我们只需要求出来不相交的对就行了。用`sum[i]`表示，0~i的字符串中有多少回文串，`pos[i]` 表示以`i`为**左端点**的回文串有多少个，`sum[i] * pos[i+1]`的总和就是不相交的回文串对数，用总对数交掉就可以了。因为内存问题，所以这里用了链式前向星，等下也会贴出来这部分，复杂度比传统的略高。
 - [x] HDU 5658 : 求每个区间的本质不同回文串...看起来挺难，一看数据范围，暴力就行...
 - [x] HDU 5157 : 求不相交的回文串的对数，和codeforces17E一样
+- [x] HDU 5157 : 向后添加字符，向前添加字符，询问多少个本质不同的回文串，双向插入回文树的模板题。
 
 顺便贴一发自己回文自动机的板子
 
@@ -399,4 +400,59 @@ struct Palindromic_Tree {
     }
 } pat;
 
+```
+
+双向回文树模板
+
+```c++
+
+struct Palindrome_Automaton {
+    int len[maxn * 2], next[maxn * 2][26], fail[maxn * 2], cnt[maxn * 2];
+    int num[maxn * 2], S[maxn * 2], sz, n[2], last[2];
+
+    int newnode(int l) {
+        for (int i = 0; i < 26; ++i)next[sz][i] = 0;
+        cnt[sz] = num[sz] = 0, len[sz] = l;
+        return sz++;
+    }
+
+    void init() {
+        sz = 0;
+        newnode(0);
+        newnode(-1);
+        S[0] = -1;
+        fail[0] = 1;
+        last[0] = last[1] = 0;
+        n[0] = maxn - 7, n[1] = maxn - 8;
+    }
+
+    int get_fail(int x, int k) {
+        S[n[0] - 1] = -1, S[n[1] + 1] = -1;
+        while (S[n[k] - (k ? 1 : -1) * (len[x] + 1)] != S[n[k]])x = fail[x];
+        return x;
+    }
+
+    int add(int c, int k) {
+        c -= 'a';
+        S[n[k] += (k ? 1 : -1)] = c;
+        int cur = get_fail(last[k],k);
+        if (!(last[k] = next[cur][c])) {
+            int now = newnode(len[cur] + 2);
+            fail[now] = next[get_fail(fail[cur],k)][c];
+            next[cur][c] = now;
+            num[now] = num[fail[now]] + 1;
+            last[k]=now;
+            if (len[last[k]]==n[1]-n[0]+1) last[k^1]=last[k];
+        }
+        //last[k] = next[cur][c];
+        //cnt[last]++;
+        return num[last[k]];
+    }
+
+    void count()//统计本质相同的回文串的出现次数
+    {
+        for (int i = sz - 1; i >= 0; --i)cnt[fail[i]] += cnt[i];
+        //逆序累加，保证每个点都会比它的父亲节点先算完，于是父亲节点能加到所有子孙
+    }
+} pam;
 ```
